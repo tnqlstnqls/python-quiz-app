@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파이썬 기초 실력 점검 퀴즈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .option-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        /* 선택된 옵션 스타일링 및 오른쪽 동그라미 강조 */
+        .option-btn.selected {
+            border-color: #6366f1 !important;
+            background-color: #eef2ff !important;
+            color: #3730a3 !important;
+            font-weight: 700;
+        }
+
+        .option-btn .circle-indicator {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .option-btn.selected .circle-indicator {
+            background-color: #6366f1 !important;
+            border-color: #6366f1 !important;
+            color: #ffffff !important;
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #f8fafc;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            white-space: pre-wrap;
+            border-left: 4px solid #6366f1;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 99;
+            animation: confetti-fall 3s linear infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 sm:p-6 min-h-screen">
+
+    <div class="w-full max-w-2xl">
+        <!-- Header Container -->
+        <div class="text-center mb-6">
+            <span class="inline-block px-3.5 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-xs font-semibold tracking-wide uppercase mb-2 border border-indigo-500/30">
+                Python Quiz App 🐍
+            </span>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                파이썬 기초 실력 점검 퀴즈
+            </h1>
+        </div>
+
+        <!-- Main Card Container -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+            
+            <div id="quiz-screen">
+                <!-- Header Status: Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center text-sm font-semibold text-slate-600 mb-2">
+                        <span id="question-number" class="text-indigo-600 font-bold">문제 1 / 5</span>
+                        <span class="text-xs text-slate-400 font-medium">최종 결과는 마지막에 공개됩니다</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                        <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 ease-out" style="width: 20%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Header & Text -->
+                <div class="mb-6">
+                    <h2 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-snug">
+                        <!-- Dynamic Question Header -->
+                    </h2>
+                    <div id="code-snippet" class="hidden"></div>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div id="options-container" class="space-y-3 mb-8">
+                    <!-- Dynamic Option Buttons -->
+                </div>
+
+                <!-- Navigation Buttons (이전 / 다음) -->
+                <div class="flex justify-between items-center gap-3 pt-2 border-t border-slate-100">
+                    <button id="prev-btn" onclick="prevQuestion()"
+                        class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all duration-200 text-sm flex items-center gap-1.5">
+                        <span>⬅️</span> 이전 문제
+                    </button>
+
+                    <button id="next-btn" onclick="nextQuestion()"
+                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all duration-200 text-sm flex items-center gap-1.5">
+                        <span id="next-btn-text">다음 문제</span> ➔
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-screen" class="hidden py-4">
+                <div class="text-center mb-6">
+                    <div class="text-5xl mb-3" id="result-emoji">🏆</div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1">퀴즈 제출 완료!</h2>
+                    <p class="text-slate-500 text-sm">수고하셨습니다! 제출하신 답변 결과입니다.</p>
+                </div>
+
+                <!-- Final Score Summary Card -->
+                <div class="bg-indigo-50/80 border border-indigo-100 rounded-2xl p-5 mb-8 text-center max-w-sm mx-auto shadow-sm">
+                    <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-1">최종 점수</div>
+                    <div class="text-4xl font-black text-indigo-600 mb-1" id="final-score">0 / 5</div>
+                    <div class="text-sm font-bold text-slate-700" id="result-message"></div>
+                </div>
+
+                <!-- Detailed Answer Review Section -->
+                <div class="mb-8">
+                    <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <span>📋</span> 문제별 정답 및 해설
+                    </h3>
+                    <div id="review-container" class="space-y-4">
+                        <!-- Dynamic Review Items -->
+                    </div>
+                </div>
+
+                <!-- Restart Quiz Button -->
+                <div class="text-center">
+                    <button onclick="restartQuiz()"
+                        class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all duration-200 hover:scale-105 text-sm">
+                        퀴즈 다시 도전하기 🔄
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 퀴즈 데이터 정의 (5문제)
+        const quizData = [
+            {
+                "id": 1,
+                "question": "파이썬에서 화면에 문장이나 값을 출력할 때 사용하는 기본 함수는 무엇인가요?",
+                "options": ["input()", "print()", "len()", "type()"],
+                "answer": "print()",
+                "explanation": "print() 함수는 괄호 안에 전달된 값을 콘솔(화면)에 출력합니다."
+            },
+            {
+                "id": 2,
+                "question": "다음 중 정수형(Integer) 데이터 타입에 해당하는 것은 무엇인가요?",
+                "options": ["\"10\"", "10.0", "10", "True"],
+                "answer": "10",
+                "explanation": "\"10\"은 문자열, 10.0은 실수(Float), True는 불리언(Boolean) 타입입니다."
+            },
+            {
+                "id": 3,
+                "question": "리스트 a = [10, 20, 30]에서 첫 번째 요소 10을 가져오기 위한 인덱싱 표현은?",
+                "options": ["a[0]", "a[1]", "a[-1]", "a[first]"],
+                "answer": "a[0]",
+                "explanation": "파이썬의 인덱스는 0부터 시작하므로 첫 번째 요소는 a[0]입니다."
+            },
+            {
+                "id": 4,
+                "question": "조건문에서 '두 값이 같은지' 비교할 때 사용하는 올바른 연산자는 무엇인가요?",
+                "options": ["=", "==", "===", "is equal"],
+                "answer": "==",
+                "explanation": "=는 변수에 값을 저장할 때 사용하고, ==는 두 값이 같은지 비교할 때 사용합니다."
+            },
+            {
+                "id": 5,
+                "question": "다음 코드 실행 시 마지막으로 출력되는 숫자는 무엇인가요?",
+                "code": "for i in range(1, 5):\n    print(i)",
+                "options": ["3", "4", "5", "1"],
+                "answer": "4",
+                "explanation": "range(1, 5)는 1부터 4까지의 숫자를 생성하므로 마지막 출력값은 4입니다."
+            }
+        ];
+
+        // 상태 변수 (학생의 선택 상태를 수집)
+        let currentIdx = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+
+        // DOM 요소 참조
+        const questionNumberEl = document.getElementById('question-number');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const codeSnippetEl = document.getElementById('code-snippet');
+        const optionsContainerEl = document.getElementById('options-container');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const nextBtnText = document.getElementById('next-btn-text');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+
+        function loadQuestion() {
+            const currentQuiz = quizData[currentIdx];
+
+            // 상단 상태 업데이트
+            questionNumberEl.textContent = `문제 ${currentIdx + 1} / ${quizData.length}`;
+            progressBarEl.style.width = `${((currentIdx + 1) / quizData.length) * 100}%`;
+
+            // 질문 및 코드
+            questionTextEl.textContent = `${currentQuiz.id}. ${currentQuiz.question}`;
+            if (currentQuiz.code) {
+                codeSnippetEl.innerHTML = `<pre class="code-block">${currentQuiz.code}</pre>`;
+                codeSnippetEl.classList.remove('hidden');
+            } else {
+                codeSnippetEl.classList.add('hidden');
+            }
+
+            // 보기 옵션 렌더링
+            optionsContainerEl.innerHTML = '';
+            currentQuiz.options.forEach((option) => {
+                const btn = document.createElement('button');
+                const isSelected = (userAnswers[currentIdx] === option);
+
+                btn.className = `option-btn w-full p-4 border-2 border-slate-200 rounded-xl text-left font-medium text-slate-700 flex justify-between items-center ${isSelected ? 'selected' : ''}`;
+                
+                // 오른쪽에 선택 상태를 나타내는 동그라미 아이콘 추가
+                btn.innerHTML = `
+                    <span class="text-sm sm:text-base">${option}</span>
+                    <span class="circle-indicator w-6 h-6 rounded-full border-2 ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 text-transparent'} flex items-center justify-center text-xs font-bold">
+                        ✓
+                    </span>
+                `;
+
+                btn.onclick = () => selectOption(option);
+                optionsContainerEl.appendChild(btn);
+            });
+
+            // 이전 버튼 활성화 여부
+            if (currentIdx === 0) {
+                prevBtn.classList.add('opacity-40', 'pointer-events-none');
+            } else {
+                prevBtn.classList.remove('opacity-40', 'pointer-events-none');
+            }
+
+            // 마지막 문제일 때 버튼 텍스트 변경
+            if (currentIdx === quizData.length - 1) {
+                nextBtnText.textContent = '최종 제출하기';
+            } else {
+                nextBtnText.textContent = '다음 문제';
+            }
+        }
+
+        // 보기 선택 시 상태 저장 및 스타일 변경
+        function selectOption(optionText) {
+            userAnswers[currentIdx] = optionText;
+
+            // UI 즉시 업데이트
+            const allBtns = optionsContainerEl.querySelectorAll('.option-btn');
+            allBtns.forEach((btn) => {
+                const optText = btn.querySelector('span').textContent.trim();
+                const indicator = btn.querySelector('.circle-indicator');
+
+                if (optText === optionText) {
+                    btn.classList.add('selected');
+                    indicator.className = 'circle-indicator w-6 h-6 rounded-full border-2 bg-indigo-600 border-indigo-600 text-white flex items-center justify-center text-xs font-bold';
+                } else {
+                    btn.classList.remove('selected');
+                    indicator.className = 'circle-indicator w-6 h-6 rounded-full border-2 border-slate-300 text-transparent flex items-center justify-center text-xs font-bold';
+                }
+            });
+        }
+
+        // 이전 문제로 이동
+        function prevQuestion() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                loadQuestion();
+            }
+        }
+
+        // 다음 문제 이동 또는 제출
+        function nextQuestion() {
+            if (userAnswers[currentIdx] === null) {
+                alert('정답을 선택한 후 이동해주세요!');
+                return;
+            }
+
+            if (currentIdx < quizData.length - 1) {
+                currentIdx++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            let score = 0;
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+
+            // 점수 계산 및 상세 리포트 항목 생성
+            quizData.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                const isCorrect = (userAns === q.answer);
+
+                if (isCorrect) score++;
+
+                const reviewCard = document.createElement('div');
+                reviewCard.className = `p-4 sm:p-5 rounded-xl border text-sm ${isCorrect ? 'bg-slate-50/80 border-slate-200' : 'bg-rose-50/50 border-rose-200'}`;
+
+                let reviewContent = `
+                    <div class="flex justify-between items-start gap-2 mb-2">
+                        <div class="font-bold text-slate-800 text-base">
+                            ${q.id}. ${q.question}
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-xs font-extrabold shrink-0 ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                            ${isCorrect ? '⭕ 정답' : '❌ 오답'}
+                        </span>
+                    </div>
+                `;
+
+                if (q.code) {
+                    reviewContent += `<pre class="code-block text-xs my-2">${q.code}</pre>`;
+                }
+
+                reviewContent += `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-200/60 text-xs sm:text-sm">
+                        <div class="${isCorrect ? 'text-emerald-700 font-semibold' : 'text-rose-700 font-semibold'}">
+                            내 제출 답: <span class="underline">${userAns || '미선택'}</span>
+                        </div>
+                        <div class="text-indigo-700 font-semibold">
+                            실제 정답: <span class="underline">${q.answer}</span>
+                        </div>
+                    </div>
+                `;
+
+                // 틀린 문제인 경우 상세 해설 제공
+                if (!isCorrect) {
+                    reviewContent += `
+                        <div class="mt-3 p-3 bg-white/80 border border-rose-200 rounded-lg text-xs text-slate-600 leading-relaxed">
+                            <span class="font-bold text-rose-700 block mb-1">💡 문제 해설</span>
+                            ${q.explanation}
+                        </div>
+                    `;
+                }
+
+                reviewCard.innerHTML = reviewContent;
+                reviewContainer.appendChild(reviewCard);
+            });
+
+            // 최종 점수 및 메세지
+            document.getElementById('final-score').textContent = `${score} / ${quizData.length}`;
+            const resultMsg = document.getElementById('result-message');
+            const resultEmoji = document.getElementById('result-emoji');
+
+            if (score === quizData.length) {
+                resultEmoji.textContent = '🥇';
+                resultMsg.textContent = '축하합니다! 완벽한 파이썬 마스터이시네요!';
+                createConfetti();
+            } else if (score >= 3) {
+                resultEmoji.textContent = '🥈';
+                resultMsg.textContent = '참 잘했습니다! 조금만 더 학습하면 만점도 가능합니다.';
+            } else {
+                resultEmoji.textContent = '🥉';
+                resultMsg.textContent = '아쉽네요! 복습을 통해 파이썬 개념을 다시 점검해보세요.';
+            }
+        }
+
+        // 축하 꽃가루 연출 함수
+        function createConfetti() {
+            const colors = ['#6366f1', '#22c55e', '#f59e0b', '#ec4899', '#3b82f6'];
+            for (let i = 0; i < 35; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 4000);
+            }
+        }
+
+        // 퀴즈 재시작
+        function restartQuiz() {
+            currentIdx = 0;
+            userAnswers.fill(null);
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            loadQuestion();
+        }
+
+        // 초기 시작
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
